@@ -66,6 +66,14 @@ jobs:
         echo "zipfile=$ZIPFILE" >> $GITHUB_OUTPUT
         echo "Built extension: $ZIPFILE"
         
+    - name: Build .crx package
+      id: build_crx
+      uses: cardinalby/webext-buildtools-chrome-crx-action@v2
+      with:
+        zipFilePath: ${{ steps.web-ext-build.outputs.zipfile }}
+        crxFilePath: ./dist/password-manager-extension-v${{ steps.get-version.outputs.version }}.crx
+        privateKey: ${{ secrets.CRX_PRIVATE_KEY }}
+        
     - name: Create GitHub Release
       id: create_release
       uses: softprops/action-gh-release@v1
@@ -74,7 +82,9 @@ jobs:
         name: Release v${{ steps.get-version.outputs.version }}
         draft: false
         prerelease: false
-        files: ${{ steps.web-ext-build.outputs.zipfile }}
+        files: |
+          ${{ steps.web-ext-build.outputs.zipfile }}
+          ${{ steps.build_crx.outputs.crxFilePath }}
         body: |
           # Password Manager Extension v${{ steps.get-version.outputs.version }}
           
@@ -93,4 +103,12 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: password-manager-extension-v${{ steps.get-version.outputs.version }}
-        path: ${{ steps.web-ext-build.outputs.zipfile }}
+        path: |
+          ${{ steps.web-ext-build.outputs.zipfile }}
+          ${{ steps.build_crx.outputs.crxFilePath }}
+          
+    - name: Upload CRX to artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: password-manager-extension-crx-v${{ steps.get-version.outputs.version }}
+        path: ${{ steps.build_crx.outputs.crxFilePath }}
