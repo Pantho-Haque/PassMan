@@ -115,3 +115,18 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Icons by [Font Awesome](https://fontawesome.com/)
 - Built with [Chrome Extensions API](https://developer.chrome.com/docs/extensions/)
 - Utilizes [Web Cryptography API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
+
+```
+Generate a key pair once on your machine (creates key.pem and key.pub):
+bash
+ssh-keygen -t rsa -m PEM -b 2048 -f key.pem
+# press Enter for an empty passphrase
+Copy the full contents of key.pem (including the -----BEGIN/END RSA PRIVATE KEY----- lines).
+In GitHub → Settings → Secrets → Actions → “New repository secret”
+• Name: CRX_PRIVATE_KEY
+• Value: paste the key contents
+• Save.
+Rerun the workflow.
+The step will now find ${{ secrets.CRX_PRIVATE_KEY }}, build a signed password-manager-extension-….crx, and attach it to the release/artifacts.
+
+```
