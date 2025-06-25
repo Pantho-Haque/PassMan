@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Lock body -->
+  <rect x="44" y="60" width="40" height="30" rx="4" fill="#ffffff"/>
+  
+  <!-- Lock shackle -->
+  <path d="M52 60 L52 48 Q52 40 64 40 Q76 40 76 48 L76 60" 
+        fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Key hole -->
+  <circle cx="64" cy="72" r="3" fill="#2563eb"/>
+  <rect x="62.5" y="75" width="3" height="6" fill="#2563eb"/>
+  
+  <!-- Key symbol overlay -->
+  <g transform="translate(85, 45)">
+    <circle cx="8" cy="8" r="6" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+    <rect x="2" y="7" width="12" height="2" fill="#fbbf24"/>
+    <rect x="12" y="5" width="2" height="2" fill="#fbbf24"/>
+    <rect x="12" y="9" width="2" height="2" fill="#fbbf24"/>
+  </g>
+  
+  <!-- Small security dots -->
+  <circle cx="50" cy="100" r="2" fill="#ffffff" opacity="0.7"/>
+  <circle cx="64" cy="105" r="2" fill="#ffffff" opacity="0.7"/>
+  <circle cx="78" cy="100" r="2" fill="#ffffff" opacity="0.7"/>
+</svg>

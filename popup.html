@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Password Manager</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Secure Password Manager</h1>
+      <div class="theme-switch">
+        <i class="fas fa-moon"></i>
+        <label class="switch">
+          <input type="checkbox" id="theme-toggle">
+          <span class="slider round"></span>
+        </label>
+        <i class="fas fa-sun"></i>
+      </div>
+    </header>
+
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for websites...">
+      <button id="search-button"><i class="fas fa-search"></i></button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="stored-passwords">Stored Passwords</button>
+      <button class="tab-button" data-tab="add-password">Add New</button>
+      <button class="tab-button" data-tab="settings">Settings</button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Stored Passwords Tab -->
+      <div id="stored-passwords" class="tab-pane active">
+        <div class="password-list" id="password-list">
+          <!-- Password entries will be populated here dynamically -->
+        </div>
+        <div class="no-passwords-message" id="no-passwords-message">
+          <i class="fas fa-lock fa-3x"></i>
+          <p>No passwords stored yet. Add your first password!</p>
+        </div>
+      </div>
+
+      <!-- Add New Password Tab -->
+      <div id="add-password" class="tab-pane">
+        <form id="password-form">
+          <div class="form-group">
+            <label for="website">Website URL</label>
+            <input type="url" id="website" placeholder="https://example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="username">Username/Email</label>
+            <input type="text" id="username" placeholder="username@example.com" required>
+          </div>
+          <div class="form-group password-field">
+            <label for="password">Password</label>
+            <div class="password-input-container">
+              <input type="password" id="password" placeholder="Enter your password" required>
+              <button type="button" id="toggle-password" class="toggle-password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category">
+              <option value="social">Social Media</option>
+              <option value="finance">Finance</option>
+              <option value="work">Work</option>
+              <option value="personal">Personal</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="notes">Notes (Optional)</label>
+            <textarea id="notes" placeholder="Add notes about this account"></textarea>
+          </div>
+          <div class="password-strength">
+            <label>Password Strength:</label>
+            <div class="strength-meter">
+              <div id="strength-bar"></div>
+            </div>
+            <span id="strength-text">No password</span>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="generate-password">Generate Strong Password</button>
+            <button type="submit" id="save-password">Save Password</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="settings" class="tab-pane">
+        <div class="settings-group">
+          <h3>Security Settings</h3>
+          <div class="setting-item">
+            <label for="auto-lock">Auto-lock after inactivity</label>
+            <select id="auto-lock">
+              <option value="1">1 minute</option>
+              <option value="5">5 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="never">Never</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="master-password-toggle">Require master password</label>
+            <label class="switch">
+              <input type="checkbox" id="master-password-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="master-password-section" id="master-password-section">
+            <button id="change-master-password">Change Master Password</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <h3>Data Management</h3>
+          <div class="setting-item">
+            <button id="export-data">Export Passwords</button>
+            <button id="import-data">Import Passwords</button>
+          </div>
+          <div class="setting-item">
+            <button id="sync-github" class="github-button">
+              <i class="fab fa-github"></i> Sync with GitHub
+            </button>
+          </div>
+          <div class="setting-item danger-zone">
+            <button id="clear-data" class="danger-button">Clear All Data</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <h3>About</h3>
+          <div class="about-content">
+            <p>Secure Password Manager v1.0.0</p>
+            <p>Your passwords are encrypted and stored locally in your browser.</p>
+            <p><a href="https://github.com/yourusername/password-manager-extension" target="_blank">View on GitHub</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="master-password-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Enter Master Password</h2>
+      <form id="master-password-form">
+        <div class="form-group">
+          <input type="password" id="master-password-input" placeholder="Enter your master password" required>
+        </div>
+        <button type="submit">Unlock</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="password-detail-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2 id="detail-website"></h2>
+      <div class="password-details">
+        <div class="detail-item">
+          <label>Username/Email:</label>
+          <div class="copy-field">
+            <span id="detail-username"></span>
+            <button class="copy-button" data-field="username">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        <div class="detail-item">
+          <label>Password:</label>
+          <div class="copy-field">
+            <span id="detail-password">••••••••••••</span>
+            <button class="toggle-button" id="detail-toggle-password">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="copy-button" data-field="password">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+        <div class="detail-item" id="detail-notes-container">
+          <label>Notes:</label>
+          <p id="detail-notes"></p>
+        </div>
+        <div class="detail-item">
+          <label>Last Updated:</label>
+          <span id="detail-date"></span>
+        </div>
+        <div class="detail-actions">
+          <button id="edit-entry">Edit</button>
+          <button id="delete-entry" class="danger-button">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+name: Build and Release Chrome Extension
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for this release (e.g., 1.0.1)'
+        required: true
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install dependencies
+      run: |
+        npm install --global web-ext
+        
+    - name: Determine version
+      id: get-version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.version }}" != "" ]]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          # Extract version from manifest.json
+          VERSION=$(grep -o '"version": *"[^"]*"' manifest.json | grep -o '"[^"]*"$' | tr -d '"')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Update version in manifest.json
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+      run: |
+        sed -i "s/\"version\": *\"[^\"]*\"/\"version\": \"${{ github.event.inputs.version }}\"/" manifest.json
+        
+    - name: Create icon directory
+      run: mkdir -p icons
+      
+    - name: Generate icons
+      run: |
+        # In a real workflow, you would have icon source files and process them
+        # For this example, we'll create placeholder icons
+        echo "Creating placeholder icons"
+        convert -size 16x16 xc:blue icons/icon16.png
+        convert -size 48x48 xc:blue icons/icon48.png
+        convert -size 128x128 xc:blue icons/icon128.png
+      continue-on-error: true
+        
+    - name: Build Chrome extension
+      id: web-ext-build
+      run: |
+        web-ext build --source-dir=./ --artifacts-dir=./dist --overwrite-dest
+        ZIPFILE=$(find ./dist -name "*.zip" | head -n 1)
+        echo "zipfile=$ZIPFILE" >> $GITHUB_OUTPUT
+        echo "Built extension: $ZIPFILE"
+        
+    - name: Create GitHub Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.get-version.outputs.version }}
+        name: Release v${{ steps.get-version.outputs.version }}
+        draft: false
+        prerelease: false
+        files: ${{ steps.web-ext-build.outputs.zipfile }}
+        body: |
+          # Password Manager Extension v${{ steps.get-version.outputs.version }}
+          
+          ## What's New
+          - Automated build and release using GitHub Actions
+          
+          ## Installation
+          1. Download the zip file
+          2. Go to chrome://extensions/
+          3. Enable "Developer mode"
+          4. Click "Load unpacked" and select the extracted folder
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload extension to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: password-manager-extension-v${{ steps.get-version.outputs.version }}
+        path: ${{ steps.web-ext-build.outputs.zipfile }}
