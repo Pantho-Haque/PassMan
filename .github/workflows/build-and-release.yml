@@ -74,6 +74,14 @@ jobs:
         crxFilePath: ./dist/password-manager-extension-v${{ steps.get-version.outputs.version }}.crx
         privateKey: ${{ secrets.CRX_PRIVATE_KEY }}
         
+    - name: Bundle CRX inside a single distributable zip
+      id: package_zip
+      run: |
+        PACKAGE_PATH=./dist/password-manager-extension-v${{ steps.get-version.outputs.version }}-with-crx.zip
+        # Create a zip that contains both the extension folder (already zipped) and the signed CRX
+        zip -j "$PACKAGE_PATH" "${{ steps.web-ext-build.outputs.zipfile }}" "${{ steps.build_crx.outputs.crxFilePath }}"
+        echo "packagefile=$PACKAGE_PATH" >> $GITHUB_OUTPUT
+        
     - name: Create GitHub Release
       id: create_release
       uses: softprops/action-gh-release@v1
@@ -83,8 +91,7 @@ jobs:
         draft: false
         prerelease: false
         files: |
-          ${{ steps.web-ext-build.outputs.zipfile }}
-          ${{ steps.build_crx.outputs.crxFilePath }}
+          ${{ steps.package_zip.outputs.packagefile }}
         body: |
           # Password Manager Extension v${{ steps.get-version.outputs.version }}
           
@@ -102,11 +109,9 @@ jobs:
     - name: Upload extension to artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: password-manager-extension-v${{ steps.get-version.outputs.version }}
-        path: |
-          ${{ steps.web-ext-build.outputs.zipfile }}
-          ${{ steps.build_crx.outputs.crxFilePath }}
-          
+        name: password-manager-extension-v${{ steps.get-version.outputs.version }}-with-crx
+        path: ${{ steps.package_zip.outputs.packagefile }}
+        
     - name: Upload CRX to artifacts
       uses: actions/upload-artifact@v4
       with:
